@@ -72,9 +72,9 @@ export default class Board extends Component {
                     justifyContent="center"
                     gap="size-100">
                     {_.map(this.state.data, (row, rowIdx) => {
-                        return <Fragment>
+                        return <Fragment key={rowIdx}>
                             {_.map(row, (cell, idx) => {
-                                return <View  backgroundColor="green-400" UNSAFE_style={{
+                                return <View  key={rowIdx+"_"+ idx} backgroundColor="green-400" UNSAFE_style={{
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center"

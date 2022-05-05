@@ -29,6 +29,9 @@
 
 .grid-2048{
   margin: 2rem;
+  color: red;
+  font-weight: bold;
+  font-size: 1.25rem;
 }
 
 .button-container{
