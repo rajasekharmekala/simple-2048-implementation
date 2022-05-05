@@ -1,8 +1,11 @@
 import React, { Component, Fragment } from "react"
 import _ from 'lodash'
-import { Button, Grid, View, Content, Flex } from "@adobe/react-spectrum"
+import { Button, Grid, View, Content } from "@adobe/react-spectrum"
+import { Game } from "./game"
+import { Direction } from "./events"
 
 export default class Board extends Component {
+    game
 
     constructor(props) {
         super(props)
@@ -10,28 +13,51 @@ export default class Board extends Component {
         this.moveDown = this.moveDown.bind(this)
         this.moveLeft = this.moveLeft.bind(this)
         this.moveRight = this.moveRight.bind(this)
-        this.size = 4
 
-        let data = []
-        for (let i = 0; i < this.size; i++) {
-            data.push(new Array(this.size).fill(0))
-        }
+        this.game = new Game(4)
 
         this.state = {
-            data: data
+            data: this.game.grid.data
+        }
+
+    }
+
+    async componentDidMount(){
+        this.game.queueAction({
+            type: "START"
+          });
+        while(true){
+            await this.game.run()
+            this.setState({data: this.game.grid.data})
         }
     }
 
     moveUp(event) {
+        this.game.queueAction({
+            type: "MOVE",
+            direction: Direction.Up
+        })
     }
 
     moveDown(event) {
+        this.game.queueAction({
+            type: "MOVE",
+            direction: Direction.Down
+        })
     }
 
     moveLeft(event) {
+        this.game.queueAction({
+            type: "MOVE",
+            direction: Direction.Left
+        })
     }
 
     moveRight(event) {
+        this.game.queueAction({
+            type: "MOVE",
+            direction: Direction.Right
+        })
     }
 
     render() {
@@ -45,14 +71,13 @@ export default class Board extends Component {
                     autoRows="size-800"
                     justifyContent="center"
                     gap="size-100">
-                    {_.map(this.state.data, row => {
-                        { console.log("row", this.state.data) }
+                    {_.map(this.state.data, (row, rowIdx) => {
                         return <Fragment>
                             {_.map(row, (cell, idx) => {
-                                return <View key={idx} backgroundColor="green-400" UNSAFE_style={{
+                                return <View  backgroundColor="green-400" UNSAFE_style={{
                                     display: "flex",
-                                    "align-items": "center",
-                                    "justify-content": "center"
+                                    alignItems: "center",
+                                    justifyContent: "center"
                                 }} >
                                     <Content>{cell}</Content>
                                 </View>
@@ -65,26 +90,26 @@ export default class Board extends Component {
                 <div className="button-container">
                     <Button
                         variant="cta"
-                        onClick={this.moveUp}>
+                        onPress={this.moveUp}>
                         UP
                     </Button>
                 </div >
                 <div className="button-container">
                     <Button
                         variant="cta"
-                        onClick={this.moveLeft}>
+                        onPress={this.moveLeft}>
                         LEFT
                     </Button>
                     <Button
                         variant="cta"
-                        onClick={this.moveRight}>
+                        onPress={this.moveRight}>
                         RIGHT
                     </Button>
                 </div>
                 <div className="button-container">
                     <Button
                         variant="cta"
-                        onClick={this.moveDown}>
+                        onPress={this.moveDown}>
                         DOWN
                     </Button>
                 </div>
