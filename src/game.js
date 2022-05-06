@@ -129,6 +129,7 @@ export class Game {
           this.calculateMoveEvents(Direction.Left).length > 0 ||
           this.calculateMoveEvents(Direction.Down).length > 0
         if (!weHaveSomePossibleEvents) {
+          alert("Game Over!!! click reset")
           // Game is over, dude
           gameEvents.push(new GameOverEvent())
         }

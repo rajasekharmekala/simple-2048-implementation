@@ -13,8 +13,9 @@ export default class Board extends Component {
         this.moveDown = this.moveDown.bind(this)
         this.moveLeft = this.moveLeft.bind(this)
         this.moveRight = this.moveRight.bind(this)
-
-        this.game = new Game(4)
+        this.reset = this.reset.bind(this)
+        this.size = 4
+        this.game = new Game(this.size)
 
         this.state = {
             data: this.game.grid.data
@@ -28,7 +29,12 @@ export default class Board extends Component {
           });
         while(true){
             await this.game.run()
-            this.setState({data: this.game.grid.data})
+            this.setState({data: this.game.grid.data}, ()=>{
+                if(this.state.data[this.size-1][0]==2048){
+                    this.props.showDialog(true, "You Won!!! Restarting Game...")
+                    this.reset()
+                }
+            })
         }
     }
 
@@ -58,6 +64,12 @@ export default class Board extends Component {
             type: "MOVE",
             direction: Direction.Right
         })
+    }
+
+    reset(){
+        this.game.queueAction({
+            type: "START"
+          })
     }
 
     render() {
@@ -111,6 +123,14 @@ export default class Board extends Component {
                         variant="cta"
                         onPress={this.moveDown}>
                         DOWN
+                    </Button>
+                </div>
+
+                <div className="button-container">
+                    <Button
+                        variant="negative"
+                        onPress={this.reset}>
+                        Reset
                     </Button>
                 </div>
             </div>)
