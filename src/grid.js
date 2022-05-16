@@ -18,7 +18,7 @@ export class Grid {
     }
   
     updateCell(irow, icol, value) {
-        if(irow >=0 && irow<this.size && icol >=0 && icol < this.size && this.data[irow][icol] == 0){
+        if(irow >=0 && irow<this.size && icol >=0 && icol < this.size){
             this.data[irow][icol] = value
         }
     }
