@@ -18,6 +18,7 @@ export class Game {
 
   constructor(size) {
     this.grid = new Grid(size)
+    this.latestTile = null
   }
 
 
@@ -43,19 +44,14 @@ export class Game {
 
         gameEvents.push(new GameStartedEvent())
         for (let irow = 0; irow < this.grid.size; irow++) {
-          for (let icell = 0; icell < this.grid.size; icell++) {
-            if (this.grid.data[irow][icell] > 0) {
-            //   gameEvents.push(
-                // new TileDeletedEvent({ cellIndex: icell, rowIndex: irow })
-            //   )
-              this.grid.data[irow][icell] = 0
+          for (let icol = 0; icol < this.grid.size; icol++) {
+            if (this.grid.data[irow][icol] > 0) {
+              this.grid.data[irow][icol] = 0
             }
           }
         }
-        const newTile = this.insertNewTileToVacantSpace()
-        if (newTile) {
-        //   gameEvents.push(new TileCreatedEvent(newTile))
-        }
+        this.latestTile = this.addNewCell()
+        console.log(this.latestTile)
 
     }
     return gameEvents
@@ -111,8 +107,8 @@ export class Game {
 
     // If we have events then there were some movements and therefore there must be some empty space to insert new tile
     if (anyTileMoved) {
-      const newTile = this.insertNewTileToVacantSpace()
-      if (!newTile) {
+      this.latestTile = this.addNewCell()
+      if (!this.latestTile) {
         throw new Error("New title must be inserted somewhere!")
       }
     //   gameEvents.push(new TileCreatedEvent(newTile))
@@ -143,7 +139,7 @@ export class Game {
     return Math.floor(Math.random() * max);
   }
 
-  insertNewTileToVacantSpace() {
+  addNewCell() {
     const emptyTiles = this.grid.availableCells()
     if (emptyTiles.length > 0) {
       const ti = this.getRandomInt(emptyTiles.length)

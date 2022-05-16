@@ -37,3 +37,8 @@
 .button-container{
   margin:1rem;
 }
+
+.cell-value{
+  font-weight: bold;
+  font-size: 2rem;
+}
