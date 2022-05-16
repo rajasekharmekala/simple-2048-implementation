@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react"
 import _ from 'lodash'
 import { Button, Grid, View, Content } from "@adobe/react-spectrum"
 import { Game } from "./game"
-import { Direction } from "./events"
+import { Direction } from "./grid"
 
 export default class Board extends Component {
     game
@@ -71,10 +71,6 @@ export default class Board extends Component {
         this.state = {
             data: this.game.grid.data
         }
-
-    }
-
-    async componentDidMount(){
         document.addEventListener('keydown', (e)=>{
             switch (e.keyCode) {
                 case 37:
@@ -91,6 +87,10 @@ export default class Board extends Component {
                     break;
             }
         })
+
+    }
+
+    async componentDidMount(){
 
         this.game.queueAction({
             type: "START"
@@ -159,7 +159,7 @@ export default class Board extends Component {
                                     alignItems: "center",
                                     justifyContent: "center",
                                     border: "4px solid #bbada0",
-                                    background: this.game.latestTile && this.game.latestTile.rowIndex == rowIdx && this.game.latestTile.colIndex == idx? "#dbe67c": Board.COLORMAP[cell].backgroundColor,
+                                    background: this.game.latestCell && this.game.latestCell.rowIndex == rowIdx && this.game.latestCell.colIndex == idx? "#dbe67c": Board.COLORMAP[cell].backgroundColor,
                                     borderRadius: "0.5rem"
                                 }} >
                                     <Content UNSAFE_className="cell-value" UNSAFE_style={{

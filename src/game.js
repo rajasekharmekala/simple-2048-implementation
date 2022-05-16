@@ -1,14 +1,8 @@
 
-import {
-  TileMergeEvent,
-  TileMoveEvent,
-  GameOverEvent,
-  GameStartedEvent,
-  Direction
-} from "./events"
+import { Direction } from "./grid"
 
 import { Grid } from "./grid"
-import { RowProcessor } from "./row_processor"
+import util from "./util"
 
 
 export class Game {
@@ -16,13 +10,13 @@ export class Game {
   acQueue = []
 
   constructor(size) {
-    this.size = size  
+    this.size = size
     this.init()
   }
 
-  init(){
+  init() {
     this.grid = new Grid(this.size)
-    this.latestTile = null
+    this.latestCell = null
   }
 
 
@@ -32,7 +26,7 @@ export class Game {
 
   async run() {
     while (this.acQueue.length === 0) {
-        await new Promise(r => setTimeout(r, 100))
+      await new Promise(r => setTimeout(r, 100))
     }
 
     const action = this.acQueue.splice(0, 1)[0]
@@ -41,90 +35,59 @@ export class Game {
 
   processAction(action) {
     if (action.type === "MOVE") {
-      this.processMoveAction(action.direction)
+      this.processMove(action.direction)
     }
     if (action.type === "START") {
-        this.init()
-        this.latestTile = this.addNewCell()
+      this.init()
+      this.latestCell = this.addNewCell()
     }
   }
 
-  calculateMoveEvents(move) {
-    const gameEvents = []
+  getMoves(move) {
+    let moves = []
     const rowsData = this.grid.groupRows(move)
 
     for (const row of rowsData) {
-      const rowEvents = RowProcessor.ProcessRow(row)
+      const updates = util.updateCells(row)
 
-      //apply row events to game grid and publish them to subscribers
-      for (const rowEvent of rowEvents) {
-        const oldPos = row[rowEvent.oldIndex]
-        const newPos = row[rowEvent.newIndex]
-        if (rowEvent.isMerged) {
-          gameEvents.push(
-            new TileMergeEvent(oldPos, newPos, rowEvent.mergedValue)
-          )
-        } else {
-          gameEvents.push(
-            new TileMoveEvent(
-              oldPos,
-              newPos,
-              rowEvent.value,
-              rowEvent.isDeleted
-            )
-          )
-        }
+      for (const update of updates) {
+        const oldPosition = row[update.oldIndex]
+        const newPosition = row[update.newIndex]
+        moves.push({
+          oldPosition,
+          newPosition,
+          value: update.isMerged ? update.mergedValue : update.value,
+          shouldBeDeleted: update.isDeleted
+        })
       }
     }
 
-    return gameEvents
+    return moves
   }
 
-  processMoveAction(move) {
-    const gameEvents = this.calculateMoveEvents(move)
+  processMove(move) {
+    const moves = this.getMoves(move)
 
-    const anyTileMoved = gameEvents.length > 0
-
-    for (const event of gameEvents) {
-      if (event instanceof TileMoveEvent) {
-        this.grid.updateCell(event.newPosition.rowIndex, event.newPosition.colIndex, event.value)
-        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.colIndex )
-      }
-
-      if (event instanceof TileMergeEvent) {
-        this.grid.updateCell(event.mergePosition.rowIndex, event.mergePosition.colIndex, event.newValue)
-        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.colIndex )
-      }
+    for (const move of moves) {
+      this.grid.updateCell(move.newPosition.rowIndex, move.newPosition.colIndex, move.value)
+      this.grid.clearCell(move.oldPosition.rowIndex, move.oldPosition.colIndex)
     }
 
-    // If we have events then there were some movements and therefore there must be some empty space to insert new tile
-    if (anyTileMoved) {
-      this.latestTile = this.addNewCell()
-      if (!this.latestTile) {
-        throw new Error("New title must be inserted somewhere!")
+    if (moves.length >0) {
+      this.latestCell = this.addNewCell()
+      if (!this.latestCell) {
+        alert("Cannot insert new cell!!!")
+        throw new Error("Cannot insert new cell!!!")
       }
-    //   gameEvents.push(new TileCreatedEvent(newTile))
     } else {
-    //   gameEvents.push(new TilesNotMovedEvent(move))
-
-      // Here we need to check if game grid is full - so might be game is finished if there is no possibility to make a movement
       const availTitles = this.grid.availableCells()
       if (availTitles.length == 0) {
-        // Check if there are possible movements
-        const weHaveSomePossibleEvents =
-          this.calculateMoveEvents(Direction.Up).length > 0 ||
-          this.calculateMoveEvents(Direction.Right).length > 0 ||
-          this.calculateMoveEvents(Direction.Left).length > 0 ||
-          this.calculateMoveEvents(Direction.Down).length > 0
-        if (!weHaveSomePossibleEvents) {
-          alert("Game Over!!! click reset")
-          // Game is over, dude
-          gameEvents.push(new GameOverEvent())
-        }
+
+        const possibleMoves = this.getMoves(Direction.Up).length > 0 || this.getMoves(Direction.Right).length > 0 || this.getMoves(Direction.Left).length > 0 || this.getMoves(Direction.Down).length > 0
+        return !possibleMoves? alert("Game Over!!! click reset") : null
       }
     }
 
-    return gameEvents
   }
 
   getRandomInt(max) {
@@ -132,17 +95,17 @@ export class Game {
   }
 
   addNewCell() {
-    const emptyTiles = this.grid.availableCells()
-    if (emptyTiles.length > 0) {
-      const ti = this.getRandomInt(emptyTiles.length)
-      const pos = emptyTiles[ti]
-      const tile = {
+    const emptyCells = this.grid.availableCells()
+    if (emptyCells.length > 0) {
+      const ti = this.getRandomInt(emptyCells.length)
+      const pos = emptyCells[ti]
+      const cell = {
         rowIndex: pos.rowIndex,
         colIndex: pos.colIndex,
         value: 2
       }
       this.grid.updateCell(pos.rowIndex, pos.colIndex, 2)
-      return tile
+      return cell
     }
 
     return undefined

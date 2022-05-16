@@ -1,5 +1,9 @@
-import { Direction } from "./events"
-
+export class Direction {
+  static Up = "up"
+  static Down = "down"
+  static Right = "right"
+  static Left = "left"
+}
 
 export class Grid {
     size
@@ -19,7 +23,7 @@ export class Grid {
         }
     }
   
-    clearTile(irow, icol) {
+    clearCell(irow, icol) {
       this.data[irow][icol] = 0
     }
   
