@@ -2,7 +2,6 @@
 import {
   TileMergeEvent,
   TileMoveEvent,
-  GameEvent,
   GameOverEvent,
   GameStartedEvent,
   Direction
@@ -17,7 +16,12 @@ export class Game {
   acQueue = []
 
   constructor(size) {
-    this.grid = new Grid(size)
+    this.size = size  
+    this.init()
+  }
+
+  init(){
+    this.grid = new Grid(this.size)
     this.latestTile = null
   }
 
@@ -36,30 +40,18 @@ export class Game {
   }
 
   processAction(action) {
-    const gameEvents = []
     if (action.type === "MOVE") {
-      gameEvents.push(...this.processMoveAction(action.direction))
+      this.processMoveAction(action.direction)
     }
     if (action.type === "START") {
-
-        gameEvents.push(new GameStartedEvent())
-        for (let irow = 0; irow < this.grid.size; irow++) {
-          for (let icol = 0; icol < this.grid.size; icol++) {
-            if (this.grid.data[irow][icol] > 0) {
-              this.grid.data[irow][icol] = 0
-            }
-          }
-        }
+        this.init()
         this.latestTile = this.addNewCell()
-        console.log(this.latestTile)
-
     }
-    return gameEvents
   }
 
   calculateMoveEvents(move) {
     const gameEvents = []
-    const rowsData = this.grid.getRowDataByDirection(move)
+    const rowsData = this.grid.groupRows(move)
 
     for (const row of rowsData) {
       const rowEvents = RowProcessor.ProcessRow(row)
@@ -95,13 +87,13 @@ export class Game {
 
     for (const event of gameEvents) {
       if (event instanceof TileMoveEvent) {
-        this.grid.updateTileByPos(event.newPosition, event.value)
-        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.cellIndex )
+        this.grid.updateCell(event.newPosition.rowIndex, event.newPosition.colIndex, event.value)
+        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.colIndex )
       }
 
       if (event instanceof TileMergeEvent) {
-        this.grid.updateTileByPos(event.mergePosition, event.newValue)
-        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.cellIndex )
+        this.grid.updateCell(event.mergePosition.rowIndex, event.mergePosition.colIndex, event.newValue)
+        this.grid.clearTile(event.oldPosition.rowIndex,event.oldPosition.colIndex )
       }
     }
 
@@ -146,10 +138,10 @@ export class Game {
       const pos = emptyTiles[ti]
       const tile = {
         rowIndex: pos.rowIndex,
-        cellIndex: pos.cellIndex,
+        colIndex: pos.colIndex,
         value: 2
       }
-      this.grid.insertTile(pos.rowIndex, pos.cellIndex, 2)
+      this.grid.updateCell(pos.rowIndex, pos.colIndex, 2)
       return tile
     }
 

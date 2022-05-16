@@ -159,7 +159,7 @@ export default class Board extends Component {
                                     alignItems: "center",
                                     justifyContent: "center",
                                     border: "4px solid #bbada0",
-                                    background: this.game.latestTile && this.game.latestTile.rowIndex == rowIdx && this.game.latestTile.cellIndex == idx? "#dbe67c": Board.COLORMAP[cell].backgroundColor,
+                                    background: this.game.latestTile && this.game.latestTile.rowIndex == rowIdx && this.game.latestTile.colIndex == idx? "#dbe67c": Board.COLORMAP[cell].backgroundColor,
                                     borderRadius: "0.5rem"
                                 }} >
                                     <Content UNSAFE_className="cell-value" UNSAFE_style={{

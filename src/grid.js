@@ -13,37 +13,32 @@ export class Grid {
       }
     }
   
-    insertTile(irow, icell, value) {
-        if(irow >=0 && irow<this.size && icell >=0 && icell < this.size && this.data[irow][icell] == 0){
-            this.data[irow][icell] = value
-        }else{
-            throw new Error("Invalid cell")
+    updateCell(irow, icol, value) {
+        if(irow >=0 && irow<this.size && icol >=0 && icol < this.size && this.data[irow][icol] == 0){
+            this.data[irow][icol] = value
         }
     }
   
-    clearTile(irow, icell) {
-      this.data[irow][icell] = 0
+    clearTile(irow, icol) {
+      this.data[irow][icol] = 0
     }
   
-    getTile(irow, icell) {
+    getCell(irow, icol) {
       return {
         rowIndex: irow,
-        cellIndex: icell,
-        value: this.data[irow][icell]
+        colIndex: icol,
+        value: this.data[irow][icol]
       }
     }
   
-    updateTileByPos(pos, newValue) {
-      this.data[pos.rowIndex][pos.cellIndex] = newValue
-    }
   
     availableCells() {
       const availPositions = []
   
       for (let irow = 0; irow < this.size; ++irow) {
-        for (let icell = 0; icell < this.size; ++icell) {
-          if (this.data[irow][icell] == 0) {
-            availPositions.push({ rowIndex: irow, cellIndex: icell })
+        for (let icol = 0; icol < this.size; ++icol) {
+          if (this.data[irow][icol] == 0) {
+            availPositions.push({ rowIndex: irow, colIndex: icol })
           }
         }
       }
@@ -51,15 +46,15 @@ export class Grid {
       return availPositions
     }
   
-    getRowDataByDirection(move) {
+    groupRows(move) {
       const result = []
   
       switch (move) {
         case Direction.Left:
           for (let irow = 0; irow < this.size; ++irow) {
             const row = []
-            for (let icell = 0; icell < this.size; ++icell) {
-              row.push(this.getTile(irow, icell))
+            for (let icol = 0; icol < this.size; ++icol) {
+              row.push(this.getCell(irow, icol))
             }
             result.push(row)
           }
@@ -67,26 +62,26 @@ export class Grid {
         case Direction.Right:
           for (let irow = 0; irow < this.size; ++irow) {
             const row = []
-            for (let icell = 0; icell < this.size; ++icell) {
-              row.push(this.getTile(irow, this.size - icell - 1))
+            for (let icol = 0; icol < this.size; ++icol) {
+              row.push(this.getCell(irow, this.size - icol - 1))
             }
             result.push(row)
           }
           break
         case Direction.Up:
-          for (let icell = 0; icell < this.size; ++icell) {
+          for (let icol = 0; icol < this.size; ++icol) {
             const row = []
             for (let irow = 0; irow < this.size; ++irow) {
-              row.push(this.getTile(irow, icell))
+              row.push(this.getCell(irow, icol))
             }
             result.push(row)
           }
           break
         case Direction.Down:
-          for (let icell = 0; icell < this.size; ++icell) {
+          for (let icol = 0; icol < this.size; ++icol) {
             const row = []
             for (let irow = 0; irow < this.size; ++irow) {
-              row.push(this.getTile(this.size - irow - 1, icell))
+              row.push(this.getCell(this.size - irow - 1, icol))
             }
             result.push(row)
           }

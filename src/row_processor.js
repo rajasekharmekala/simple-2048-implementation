@@ -19,7 +19,7 @@ export class TileUpdateEvent {
 export class RowProcessor {
   static ProcessRow(tiles){
     let valueToMerge = tiles[0].value
-    let availableCellIndex = tiles[0].value > 0 ? 1 : 0
+    let availablecolIndex = tiles[0].value > 0 ? 1 : 0
     const resultEvents = []
     let moveEventBeforeMerge = undefined
 
@@ -32,17 +32,17 @@ export class RowProcessor {
       }
 
       if (valueToMerge != current) {
-        if (ir > availableCellIndex) {
+        if (ir > availablecolIndex) {
           // Move case
           moveEventBeforeMerge = new TileUpdateEvent(
             ir,
-            availableCellIndex,
+            availablecolIndex,
             current
           )
           resultEvents.push(moveEventBeforeMerge)
         }
         valueToMerge = current
-        ++availableCellIndex
+        ++availablecolIndex
         continue
       }
 
@@ -54,8 +54,8 @@ export class RowProcessor {
         // Fake move event just for deletion
         resultEvents.push(
           new TileUpdateEvent(
-            availableCellIndex - 1,
-            availableCellIndex - 1,
+            availablecolIndex - 1,
+            availablecolIndex - 1,
             current,
             -1
           )
@@ -64,7 +64,7 @@ export class RowProcessor {
       resultEvents.push(
         new TileUpdateEvent(
           ir,
-          availableCellIndex - 1,
+          availablecolIndex - 1,
           current,
           current + valueToMerge
         )
